@@ -1,4 +1,7 @@
-function [out] = preprocess(h5Path)
+% function [out] = preprocess(h5Path)
+
+    roiName = '20260210/obj16X08W_ASAP6c_M1/roi2';
+    h5Path = fullfile('$SCRATCH/SLab/ASAP6c', roiName, 'results/dataset.h5');
 
     load(strrep(h5Path,'dataset.h5','metadata.mat'), 'bpFilter', 'metadata');
     fps = metadata.fps;
@@ -30,4 +33,4 @@ function [out] = preprocess(h5Path)
         out = 0; % Indicate failure
     end
 
-end
+% end
