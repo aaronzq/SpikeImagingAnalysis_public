@@ -6,6 +6,7 @@ h5Path = fullfile('C:\Users\Z\Documents\SLab', roiName, 'results/dataset.h5');
 load(strrep(h5Path,'dataset.h5','metadata.mat'), 'bpFilter', 'metadata');
 fps = metadata.fps;
 
+%%
 if isfile('log.txt')
     delete('log.txt');
 end
@@ -34,17 +35,17 @@ catch exception
 end
 
 %% Manual clean cell candidates
-datasetAVG = imread(fullfile(savePath, "avg.tif"));
-cleanExtractFiles(savePath, datasetAVG);
+datasetAVG = imread(fullfile(metadata.savePath, "avg.tif"));
+cleanExtractFiles(metadata.savePath, datasetAVG);
 
 %% Only use the spatial filters from EXTRACT and get the raw signals. 
-d = dir(fullfile(savePath, 'DemixingEXTRACT', 'dataset_bp_moco_dtr', '*_clean*.mat'));
+d = dir(fullfile(metadata.savePath, 'DemixingEXTRACT', 'dataset_bp_moco_dtr', '*_clean*.mat'));
 if isempty(d)
     error('No _clean .mat file found in %s', fullfile(metadata.savePath, 'DemixingEXTRACT', 'dataset_dtr'));
 end
 cleanMatFile = fullfile(d(1).folder, d(1).name);
 load(cleanMatFile);
-datasetAVG = imread(fullfile(savePath, "avg.tif"));
+datasetAVG = imread(fullfile(metadata.savePath, "avg.tif"));
 figure; show_cell_overlay(output, output.cellID, 'base', datasetAVG, 'contour_thresh', 0.3, 'label', 1);
 figure; plot(output.temporal_weights(:,output.cellID));
 path=char(strrep(h5Path,'.h5', '_bp_moco.h5'));
