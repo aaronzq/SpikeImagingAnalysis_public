@@ -27,8 +27,8 @@ options.windowsize=1000;
 options.dataset='mov';
 options.BandPx=bpFilter;
 options.verbose=true;
-options.diary=true;
-options.diary_name='diary_bp';
+% options.diary=true;
+% options.diary_name='diary_bp';
 %% GET SUMMARY OUTPUT STRUCTURE
 % [summary]=outputSummaryMotionCorr(options);
 
@@ -106,9 +106,9 @@ disps('Spatial Band-Pass filtering finished')
 % summaryMotionCorr.normcorre_options=normcorre_options;
 % save_summary(summaryMotionCorr,diagnosticFolder);
 
-if options.diary
-    diary off
-end
+% if options.diary
+%     diary off
+% end
 
     function disps(string) %overloading disp for this function
         if options.verbose

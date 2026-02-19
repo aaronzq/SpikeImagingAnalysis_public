@@ -50,13 +50,8 @@ options.releaseOnNframe = 100000;
 [~,~,summary]=loadDCIMGchunks(fullfile(metadata.mainFolder, dcimgFileList(1).name), options);
 
 %%
-
-save(fullfile(metadata.savePath, 'metadata.mat'), 'metadata', 'options');
-
-
-%% Bandpass and motion correction
-
 [bpFilter]=findBestFilterParameters(metadata.h5Path);
-bandPassMovieChunk(metadata.h5Path, bpFilter);
-path=char(strrep(metadata.h5Path,'.h5', '_bp.h5'));
-motionCorr1Movie(path,'nonRigid', false,'isRawInput',false,'dcRemoval',false);
+
+save(fullfile(metadata.savePath, 'metadata.mat'), 'metadata', 'options', 'bpFilter');
+
+
