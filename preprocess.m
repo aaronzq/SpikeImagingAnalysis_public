@@ -10,7 +10,7 @@
         delete('log.txt');
     end
     diary log.txt
-    
+    parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')));
     try
         %% Bandpass and motion correction
         bandPassMovieChunk(h5Path, bpFilter);
