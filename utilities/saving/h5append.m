@@ -40,9 +40,10 @@ movie_size=size(movie); % unsually checking something here to define default chu
 if length(movie_size)<3
     movie_size=[movie_size,1];
 end
-frame_size=movie_size(1:2);
-options.ChunkSize=[frame_size, 1];  % you may consider finer chunking in space for tile loading, but this is not tested % 2020-06-14 03:08:02 RC
 
+
+options.ChunkSize = movie_size;  % you may consider finer chunking in space for tile loading, but this is not tested % 2020-06-14 03:08:02 RC
+options.ChunckingDimension = 3;
 %% VARIABLE CHECK 
 
 if nargin>=3
@@ -53,7 +54,6 @@ if nargin>=4
 options=getOptions(options,varargin(2:end)); % CHECK IF NUMBER OF THE OPTION ARGUMENT OK!
 end
 input_options=options; % saving orginally passed options to output them in the original form for potential next use
-
 
 %% Summary preparation
 summary.function_path=mfilename('fullpath');
@@ -76,13 +76,30 @@ end
 
 if ~dataset_ind % dataset does not exist
     disp('Creating new dataset')
-    h5create(filename,dataset_name,[frame_size, Inf],'Datatype',class(movie),'ChunkSize',options.ChunkSize);
+    switch options.ChunckingDimension
+        case 1
+            h5create(filename,dataset_name,[Inf, movie_size(2), movie_size(3)],'Datatype',class(movie),'ChunkSize',options.ChunkSize);
+        case 2 
+            h5create(filename,dataset_name,[movie_size(1), Inf, movie_size(3)],'Datatype',class(movie),'ChunkSize',options.ChunkSize);
+        case 3
+            h5create(filename,dataset_name,[movie_size(1), movie_size(2), Inf],'Datatype',class(movie),'ChunkSize',options.ChunkSize);
+    end
+    
     h5write(filename, dataset_name, movie, [1,1,1], movie_size); % movie size needs to have 3 elements RC
 else
     disp('Dataset already exists, appending')
     [dataset_ind,info_h5]=exist_dataset(filename,dataset_name);
     h5currentsize=info_h5.Datasets(dataset_ind).Dataspace.Size;
-    h5write(filename,dataset_name, movie,[1,1,h5currentsize(3)+1],movie_size); % movie size needs to have 3 elements RC
+
+    switch options.ChunckingDimension
+        case 1
+            h5write(filename,dataset_name, movie,[h5currentsize(1)+1,1,1],movie_size); % movie size needs to have 3 elements RC
+        case 2
+            h5write(filename,dataset_name, movie,[1,h5currentsize(2)+1,1],movie_size); % movie size needs to have 3 elements RC
+        case 3
+            h5write(filename,dataset_name, movie,[1,1,h5currentsize(3)+1],movie_size); % movie size needs to have 3 elements RC
+    end
+
 end
 
 

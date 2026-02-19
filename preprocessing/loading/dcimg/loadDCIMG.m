@@ -29,6 +29,9 @@ function [movie,totalframes,summary]=loadDCIMG(filepath,varargin)
 %
 % Created by Radek, Jizhou Li and Simon Haziza, Stanford University 2019
 
+% Switch order of cropping and resizing. Now crop first and then resize. ZW 2026-02-12 4
+% Change resize method to bilinear for denoising effect. ZW 2026-02-12 
+% Simplify the start and last frame logics due to bug in totalframes returned by mex. There is no built-in protection against index exceeding. Frame number has to be manually chosen with caution. ZW 2026-02-12 
 %% OPTIONS
 options.resize=false; % down sample spatially the file while loading? It speeds up loading especially combined with a parallel pool
 options.parallel=true; % for parallel computing
@@ -49,20 +52,18 @@ options.cropROI=[];
 % setting up a first frame
 if nargin>=2
     switch length(varargin{1})
-        case 0 % empty frame range
-            startframe=int32(0); % indexing starts from 0 for the mex file!!!
-            maxframe=int32(0);
         case 1 % movie=LoadDCIMG(filepath,maxframe) TODO
             startframe=int32(0); % indexing starts from 0 for the mex file!!!
-            maxframe=int32(varargin{1});
+            endframe=int32(varargin{1}-1);
         case 2 % movie=LoadDCIMG(filepath,[frameFirst, frameLast]) TODO
             startframe=int32(varargin{1}(1)-1); % indexing starts from 0 for the mex file!!!
-            maxframe=int32(varargin{1}(2));
+            endframe=int32(varargin{1}(2)-1);
         otherwise
             error('Wrong format of a second argument of loadDCIMG function')
     end
 else
     startframe=int32(0); % indexing starts from 0 for the mex file!!!
+    endframe=int32(0);
 end
 
 if nargin>=3 % - 2020-07-18 16:17:24 - SH : should be 2 here...
@@ -107,9 +108,21 @@ summary.frame_size_original=size(framedata);
 summary.firstframe_original=framedata;
 % - 2020-07-18 16:17:24 - SH > should be done after imcrop and imresize...
 
+if ~isempty(options.cropROI)
+    % ORCA and matlab different XY convention
+    % framedata = imcrop(framedata, options.cropROI);
+    % Change crop method. I like ImageJ and thus follow ImageJ convention
+    % for cropping. ZW 2026-2-12
+    framedata = framedata(options.cropROI(2)+1:options.cropROI(2)+options.cropROI(4), options.cropROI(1)+1:options.cropROI(1)+options.cropROI(3));
+
+    summary.frame_size_postCropping=size(framedata);
+    summary.cropROI=options.cropROI;
+end
+
+% Done after ROI cropping, ZW 2026-10-21 17:01:44
 if options.resize && options.scale_factor~=1
     framedata=cast(framedata,options.type); % cast typing to preserve more information upon averaging
-    framedata=imresize(framedata,options.scale_factor,'box');
+    framedata=imresize(framedata,options.scale_factor,'bilinear');
     summary.frame_size_resized=size(framedata);
     summary.scale_factor=options.scale_factor;
 else
@@ -117,13 +130,6 @@ else
     summary.scale_factor=1;
 end
 
-% Done after imresize > ROI detected after resizing
-if ~isempty(options.cropROI)
-    % ORCA and matlab different XY convention
-    framedata = imcrop(framedata, options.cropROI);
-    summary.frame_size_postCropping=size(framedata);
-    summary.cropROI=options.cropROI;
-end
 
 summary.frame_MB=frame_info.bytes/2^20;
 summary.file_GB=frame_info.bytes*double(totalframes)/2^30;
@@ -134,22 +140,24 @@ if options.imshow
     title(filepath,'Interpreter','none','FontWeight','normal','FontSize',8);
 end
 
+% For unknown reasons, the dcimgmatlab does not return correct totalframes. ZW 2026-10-21 17:01:44
 % setting up the end frame, in the C indexing (starting from 0).
-if ((maxframe==0)||(maxframe>=totalframes))
-    endframe = int32(totalframes(1,1)-1);
-else
-    endframe=int32(maxframe-1);
-end
+% if ((maxframe==0)||(maxframe>=totalframes))
+%     endframe = int32(totalframes(1,1)-1);
+% else
+    % endframe=int32(maxframe-1);
+% end
 
-numFrames = endframe - startframe+1;
+numFrames = endframe - startframe + 1;
 
 summary.nframes2load=double(numFrames);
 summary.frame_range=[startframe+1,endframe+1];
 summary.loadedMB_fromDisk=double(numFrames)*summary.frame_MB;
 
-if numFrames>totalframes
-    error('Wrong frame indices!');
-end
+% For unknown reasons, the dcimgmatlab does not return correct totalframes. ZW 2026-10-21 17:01:44
+% if numFrames>totalframes
+%     error('Wrong frame indices!');
+% end
 
 sizeFrame=size(framedata);
 
@@ -180,19 +188,26 @@ if options.parallel % for parallel computing
             framedata=framedata';
         end
         
-        if options.resize && options.scale_factor~=1
-            framedata=imresize(framedata,options.scale_factor,'box'); % this suprisingly gives speed up !
-        end
 %         imshow(framedata,[])
-        % Done after imresize > ROI detected after resizing
+
         if ~isempty(options.cropROI)
             % detect if red channel > to flip it to be in the same ref as
             % green channel - SH 20201129
-            if strfind(filepath,'cR.dcimg')>0
-            framedata=fliplr(framedata);
-            end
+            % Removed the flipping, ZW 2026-10-21 17:01:44
+            % if strfind(filepath,'cR.dcimg')>0
+            % framedata=fliplr(framedata);
+            % end
+
             % ORCA and matlab different XY convention
-            framedata = imcrop(framedata, options.cropROI);
+            % framedata = imcrop(framedata, options.cropROI);
+            % Change crop method. I like ImageJ and thus follow ImageJ convention for cropping. ZW 2026-10-21 17:01:44
+            framedata = framedata(options.cropROI(2)+1:options.cropROI(2)+options.cropROI(4), options.cropROI(1)+1:options.cropROI(1)+options.cropROI(3));
+
+        end
+
+        % Done after ROI cropping
+        if options.resize && options.scale_factor~=1
+            framedata=imresize(framedata,options.scale_factor,'bilinear'); % this suprisingly gives speed up !
         end
         
         movie(:,:,ii)  = framedata; % for chunks loading it has to be frameidx not frame
@@ -208,21 +223,25 @@ else
             framedata=framedata';
         end
         
-        if options.resize && options.scale_factor~=1
-            framedata=imresize(framedata,options.scale_factor,'box'); % this suprisingly gives speed up !
-        end
-%         imshow(framedata,[])
         % Done after imresize > ROI detected after resizing
         if ~isempty(options.cropROI)
             % detect if red channel > to flip it to be in the same ref as
             % green channel - SH 20201129
-            if strfind(filepath,'cR.dcimg')>0
-            framedata=fliplr(framedata);
-            end
+            % Removed the flipping, ZW 2026-10-21 17:01:44
+            % if strfind(filepath,'cR.dcimg')>0
+            % framedata=fliplr(framedata);
+            % end
             % ORCA and matlab different XY convention
-            framedata = imcrop(framedata, options.cropROI);
+            % framedata = imcrop(framedata, options.cropROI);
+            % Change crop method. I like ImageJ and thus follow ImageJ convention for cropping. ZW 2026-10-21 17:01:44
+            framedata = framedata(options.cropROI(2)+1:options.cropROI(2)+options.cropROI(4), options.cropROI(1)+1:options.cropROI(1)+options.cropROI(3));
         end
-        
+
+        if options.resize && options.scale_factor~=1
+            framedata=imresize(framedata,options.scale_factor,'bilinear'); % this suprisingly gives speed up !
+        end
+%         imshow(framedata,[])
+
         movie(:,:,ii)  = framedata; % for chunks loading it has to be frameidx not frame
     end
     disps('File loaded')

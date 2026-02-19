@@ -90,10 +90,11 @@ end
 
 if options.spatialChunk % if too many pixels > detrending is pixel-independent
     disps('Detrending in spatial chunks')
-    chunks=0:round(mx/10):mx;
-    for i=1:numel(chunks)-1
+    % chunks=0:round(mx/10):mx;
+    chunks=chunkFrames(10,[1 mx]); %Use chunkFrames for chunk assignments, ZW 20260214
+    for i=1:size(chunks,1)
         tic;
-        [movie_dtr]=runPhotoBleachingRemoval(M(chunks(i)+1:chunks(i+1),:,:),'samplingRate',fs,'lpCutOff',lpCutOff);
+        [movie_dtr]=runPhotoBleachingRemoval(M(chunks(i,1):chunks(i,2),:,:),'samplingRate',fs,'lpCutOff',lpCutOff); %Use chunkFrames for chunk assignments, ZW 20260214
         toc; disps('Data succesfully detrended')
         
         if options.dfof
@@ -102,7 +103,7 @@ if options.spatialChunk % if too many pixels > detrending is pixel-independent
         
         if options.saveData
             disps('Saving data as h5 file')
-            h5append(options.detrendMoviePath, movie_dtr,options.dataset,'chunckingDimension',1);
+            h5append(options.detrendMoviePath, movie_dtr,options.dataset,'ChunckingDimension',1);
             toc; disps('Data succesfully saved')
         end
     end
@@ -111,7 +112,7 @@ else
     disps('No spatial chunking. We can do it!')
     
     tic;
-   disp('applying abs value'); M=M+abs(min(M,[],'all'))+1; %SH_20230802 to remove negative value after spatial filtering
+    disp('applying abs value'); M=M+abs(min(M,[],'all'))+1; %SH_20230802 to remove negative value after spatial filtering
     [movie_dtr]=runPhotoBleachingRemoval(M,'samplingRate',fs,'lpCutOff',lpCutOff);
     toc; disps('Data succesfully detrended')
     

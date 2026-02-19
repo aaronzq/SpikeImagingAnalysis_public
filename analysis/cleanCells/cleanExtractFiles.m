@@ -1,4 +1,4 @@
-function cleanExtractFiles(path)
+function cleanExtractFiles(path, avg)
 
 % figure position for home workstation [1383,953,1920,970] / lab workstation [6,1241,1920,970]
 
@@ -28,7 +28,7 @@ else
                             disp('clean file already exist... replacing...')
                             delete(savePath)
                             load(filePath,'output')
-                            [cellID,figH]=extractCheckCellManual(output,'waitForUser',true);
+                            [cellID,figH]=extractCheckCellManual(output,avg,'waitForUser',true);
                             output.cellID=cellID;
                             save(savePath,'output')
                             pathParts=strsplit(mFile(i).folder,filesep);
@@ -41,7 +41,7 @@ else
                         end
                     else
                         load(filePath,'output')
-                        [cellID,figH]=extractCheckCellManual(output,'waitForUser',true);
+                        [cellID,figH]=extractCheckCellManual(output,avg,'waitForUser',true);
                         output.cellID=cellID;
                         save(savePath,'output')
                         savePDF(figH,strrep(mFile(i).name,'.mat','_summaryCellFilters'),mFile(i).folder)

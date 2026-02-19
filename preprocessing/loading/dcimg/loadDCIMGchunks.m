@@ -37,10 +37,13 @@ function [movie,movie_batch,summary]=loadDCIMGchunks(filePath,varargin)
 % - 2020-06-28 03:08:37 - leaving just h5Path option without having both h5save option  RC
 % - 2020-07-16 13:41:15 - put non-filepath input variable into varargin (binning, frameRange) SH
 
+
+% - 2026-02-12 13:41:15 - change default binning to 1, ZW
+% - 2026-02-12 13:41:15 - simplify the start and last frame logics due to bug in totalframes returned by mex. There is no built-in protection against index exceeding. Frame number has to be manually chosen with caution. ZW
 %% OPTIONS
 
 % Key parameters
-options.binning=8;
+options.binning=1;
 options.frameRange=[];
 options.cropROI=[];
 options.chunkSize=[]; % on default empty; automaticallt based on the available RAM size
@@ -55,6 +58,9 @@ options.imshow=true; % for displaying the first frame after loading, disable on 
 % Export data
 options.h5Path=[]; % if not empty doing convertion into h5 file instead of loading to memory (obsolete and deleted: options.saveh5 = false ) RC
 options.dataset='mov';
+
+% Release memory
+options.releaseOnNframe = inf;
 
 %% VARIABLE CHECK
 if nargin>=2
@@ -81,7 +87,7 @@ end
 frameRange=options.frameRange;
 if isempty(frameRange)
     firstframe=1;
-    lastframe=totalframes;
+    lastframe=1;
 elseif length(frameRange)==1
     firstframe=1;
     lastframe=frameRange;
@@ -91,7 +97,7 @@ elseif length(frameRange)==2
 else
     error('Wrong format of frame range');
 end
-lastframe=min(lastframe,totalframes);
+% lastframe=min(lastframe,totalframes);
 
 % To be changed with automatically assessing the chunking
 % determining the chunk size i.e. max number of frames to load at once
@@ -121,7 +127,12 @@ if ~isempty(options.h5Path)
              'cropROI',options.cropROI,'parallel',options.parallel,'verbose',0,'imshow',options.imshow);
         
         h5append(h5Path, single(movie_batch), options.dataset); % and that's enough an covers creation too. Don't convert to single yet. RC
-        
+
+        if ichunk>1 && mod(chunksFirstLast(ichunk,2),options.releaseOnNframe)==0
+            disps('Reboot parallel pool to release RAM.');
+            delete(gcp('nocreate'));
+        end
+
     end
     
     movie = h5Path;
@@ -137,8 +148,13 @@ else
         
         movie(:,:,nframes_loaded+(1:size(movie_batch,3)))=single(movie_batch);
         nframes_loaded=nframes_loaded+size(movie_batch,3);
+
+        if ichunk>1 && mod(chunksFirstLast(ichunk,2),options.releaseOnNframe)==0
+            disps('Shut down parallel pool temporarily to release RAM.');
+            delete(gcp('nocreate'));
+        end
     end
-    
+
     disps('File loaded');
     
 end
