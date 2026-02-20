@@ -22,7 +22,7 @@
     try
         %% Bandpass and motion correction
         bandPassMovieChunk(h5Path, bpFilter);
-        path=char(strrep(metadata.h5Path,'.h5', '_bp.h5'));
+        path=char(strrep(h5Path,'.h5', '_bp.h5'));
         motionCorr1Movie(path,'nonRigid', false,'isRawInput',false,'dcRemoval',false);
     
         %% Detrend
