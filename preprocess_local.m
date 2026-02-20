@@ -3,9 +3,9 @@ clear all;
 roiName = '20260210/obj16X08W_ASAP6c_M1/roi2';
 h5Path = fullfile('C:\Users\Z\Documents\SLab', roiName, 'results/dataset.h5');
 
-load(strrep(h5Path,'dataset.h5','metadata.mat'), 'bpFilter', 'metadata');
+load(strrep(h5Path,'dataset.h5','metadata.mat'), 'bpFilter', 'metadata', 'options');
 fps = metadata.fps;
-
+binning = options.binning;
 %%
 if isfile('log.txt')
     delete('log.txt');
@@ -50,19 +50,28 @@ figure; show_cell_overlay(output, output.cellID, 'base', datasetAVG, 'contour_th
 figure; plot(output.temporal_weights(:,output.cellID));
 path=char(strrep(h5Path,'.h5', '_bp_moco.h5'));
 [traces] = getRawTraces(path, output.spatial_weights(:,:,output.cellID));
-figure; plot(traces);
-
+% figure; plot(traces);
+adu2photon = @(x) (x-metadata.bias) .* metadata.fullwellcap ./ 2^(metadata.bitdepth) ./ metadata.quantumeff .* binning^2;
+traces_photon = adu2photon(traces);
+figure; plot(traces_photon);
 %% Calculate f0, dff, and detect spikes
+
 
 id = 2;
 
 
-t = 1/(fps)*(1:size(traces,1));
-f0 = movmedian(traces(:,id),1000);
+t = 1/(fps)*(1:size(traces_photon,1));
+f0 = movmedian(traces_photon(:,id),1000);
+
+
+
+
+
+
 % dff = traces(:,id)./f0-1;
 dff = output.temporal_weights(:,output.cellID(id));
 figure; 
-plot(traces(:,id)); hold on; plot(f0,'r'); title(['Cell ID: ' num2str(output.cellID(id))])
+plot(traces_photon(:,id)); hold on; plot(f0,'r'); title(['Cell ID: ' num2str(output.cellID(id))])
 
 
 hi = 0.035;
