@@ -1,12 +1,5 @@
 % function [out] = preprocess(h5Path)
-    addpath("dependencies/");
-    addpath("preprocessing/");
-    addpath("preprocessing/motionCorr/");
-    addpath("preprocessing/detrending/");
-    addpath("preprocessing/demixing/");
-    addpath("utilities/");
-    addpath("utilities/paths/");
-    addpath("utilities/saving/");
+    installSIA();
 
     roiName = '20260210/obj16X08W_ASAP6c_M1/roi2';
     h5Path = fullfile('/scratch/users/zqwang9/SLab/ASAP6c', roiName, 'results/dataset.h5');

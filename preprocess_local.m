@@ -1,4 +1,6 @@
 clear all;
+installSIA();
+
 
 roiName = '20260210/obj16X08W_ASAP6c_M1/roi2';
 h5Path = fullfile('C:\Users\Z\Documents\SLab', roiName, 'results/dataset.h5');

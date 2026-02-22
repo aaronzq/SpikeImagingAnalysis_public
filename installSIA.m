@@ -1,4 +1,4 @@
-function folders_on_path=installSIA()
+function []=installSIA()
 % EXAMPLE USE WITH ARGUMENTS
 % folders_on_path=installSIA()
 %
@@ -20,35 +20,38 @@ sharedPath=fileparts(functionPath);
 disps('Installing "SpikeImagingAnalysis" package')
 disps(sharedPath);
 
-folderList=[];
-for ii=1:length(options.FoldersToAdd)
-    if ii==1
-        folderList=dir(fullfile(sharedPath,options.FoldersToAdd{ii}));
-    else
-        folderList=[folderList;dir(fullfile(sharedPath,options.FoldersToAdd{ii}))];
-    end   
-end
+% folderList=[];
+% for ii=1:length(options.FoldersToAdd)
+%     if ii==1
+%         folderList=dir(fullfile(sharedPath,options.FoldersToAdd{ii}));
+%     else
+%         folderList=[folderList;dir(fullfile(sharedPath,options.FoldersToAdd{ii}))];
+%     end   
+% end
 
 addpath(sharedPath);
 disps(sprintf('Added to the Matlab path the main folder: %s',sharedPath));
 
-disps('Adding to the path subfolders')
-for ii=1:length(folderList)
-    folder=folderList(ii).name;
-    if isfolder(folder) && ~strcmp(folder,'.') && ~strcmp(folder,'..')
-        addpath(folder);
-        disps(sprintf('Added to the Matlab path : %s and its subfolders',folder));
+% disps('Adding to the path subfolders')
+% for ii=1:length(folderList)
+%     folder=folderList(ii).name;
+%     if isfolder(folder) && ~strcmp(folder,'.') && ~strcmp(folder,'..')
+%         addpath(folder);
+%         disps(sprintf('Added to the Matlab path : %s and its subfolders',folder));
+%     end
+% end
+
+for ii=1:length(options.FoldersToAdd)
+    folderPath = strsplit(genpath(fullfile(sharedPath,options.FoldersToAdd{ii})),';');
+    for jj=1:length(folderPath)-1
+        addpath(folderPath{jj});
+        disps(sprintf('Added to the Matlab path %s',folderPath{jj}));
     end
 end
 
-for ii=1:length(options.FoldersToAdd)
-    addpath(genpath(fullfile(sharedPath,options.FoldersToAdd{ii})));
-    disps(sprintf('Added to the Matlab path %s',fullfile(sharedPath,options.FoldersToAdd{ii})));
-end
+% savepath
 
-savepath
-
-disps('New folder list saved on path')
+% disps('New folder list saved on path')
 if options.unzip_quickaccessfunctions
     % unzipping
     disps('Checking if quick access function are on the path')
@@ -56,7 +59,7 @@ if options.unzip_quickaccessfunctions
         disps('Unzipping quick access functions and adding them to the repo path')
         unzip('installation\quick_access_functions.zip','\');
         addpath('quick_access_functions');
-        savepath
+        % savepath
         disps('Quick access functions added to the path')
     end
 end
@@ -82,7 +85,7 @@ if strcmpi(answear,'Y')
     normcorre_folder=getFolder;
     if normcorre_folder
         addpath(normcorre_folder);
-        savepath
+        % savepath
     end
     
 end
@@ -90,7 +93,7 @@ end
 
 
 disps('VoltageImagingAnalysis instalation finished')
-folders_on_path=folderList;
+% folders_on_path=folderList;
 
 
 function disps(string) %overloading disp for this function 
