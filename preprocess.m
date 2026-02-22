@@ -1,5 +1,34 @@
 % function [out] = preprocess(h5Path)
-    installSIA();
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\dependencies');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\dependencies\PCAICA');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\dependencies\PCAICA\doc');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\dependencies\PCAICA\doc\images');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\dependencies\altmany-export_fig');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\dependencies\altmany-export_fig\.ignore');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\demixing');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\denoising');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\denoising\LOSSDenoising');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\denoising\LOSSDenoising\utilities');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\denoising\LOSSDenoising\utilities\viewer');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\denoising\Spikes_Pipeline_2004');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\denoising\Spikes_Pipeline_2004\PROPACK');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\denoising\Spikes_Pipeline_2004\utilities');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\detrending');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\loading');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\loading\chunking');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\loading\dcimg');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\metadata');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\preprocessing\motionCorr');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\analysis');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\analysis\cleanCells');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\analysis\plots');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\analysis\spikeTiming');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\analysis\unmixing');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\utilities');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\utilities\paths');
+    addpath('C:\Users\Z\Documents\Github\SpikeImagingAnalysis_public\utilities\saving');
 
     roiName = '20260210/obj16X08W_ASAP6c_M1/roi2';
     h5Path = fullfile('/scratch/users/zqwang9/SLab/ASAP6c', roiName, 'results/dataset.h5');
