@@ -1,7 +1,6 @@
 clear all;
 installSIA();
 
-
 roiName = '20260210/obj16X08W_ASAP6c_M1/roi2';
 h5Path = fullfile('C:\Users\Z\Documents\SLab', roiName, 'results/dataset.h5');
 
@@ -59,7 +58,7 @@ figure; plot(traces_photon);
 %% Calculate f0, dff, and detect spikes
 
 
-id = 2;
+id = 4;
 
 
 t = 1/(fps)*(1:size(traces_photon,1));
@@ -76,8 +75,8 @@ figure;
 plot(traces_photon(:,id)); hold on; plot(f0,'r'); title(['Cell ID: ' num2str(output.cellID(id))])
 
 
-hi = 0.035;
-lo = 0.03;
+hi = 3*std(dff);
+lo = 0.01;
 
 dff_f = schmitt(dff, hi, lo);
 spikes1 = diff([0;dff_f])>0.5;

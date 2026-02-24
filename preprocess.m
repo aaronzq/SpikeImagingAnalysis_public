@@ -1,4 +1,4 @@
-% function [out] = preprocess(h5Path)
+function [out] = preprocess(roiName)
 
     addpath('./dependencies');
     addpath('./dependencies/EXTRACT-public');
@@ -63,7 +63,8 @@
     addpath('./utilities/paths');
     addpath('./utilities/saving');
 
-    roiName = '20260210/obj16X08W_ASAP6c_M1/roi2';
+    % roiName = '20260210/obj16X08W_ASAP6c_M1/roi2';
+    disp(['Processing /scratch/users/zqwang9/SLab/ASAP6c/' roiName]);
     h5Path = fullfile('/scratch/users/zqwang9/SLab/ASAP6c', roiName, 'results/dataset.h5');
 
     load(strrep(h5Path,'dataset.h5','metadata.mat'), 'bpFilter', 'metadata');
@@ -88,7 +89,8 @@
         path=char(strrep(h5Path,'.h5','_bp_moco_dtr.h5'));
         tic;runEXTRACT(path,'polarityGEVI','pos','cellRadius',15,'removeBackground',true,'method','robust');toc;  
 
-        disp('Preprocess finished.');
+        % disp('Preprocess finished.');
+        disp(['Finish processing /scratch/users/zqwang9/SLab/ASAP6c/' roiName]);
         out = 1;
 
     catch exception
@@ -96,4 +98,4 @@
         out = 0; % Indicate failure
     end
 
-% end
+end
