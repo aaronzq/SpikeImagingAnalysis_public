@@ -1,4 +1,4 @@
-function [out] = preprocess(roiName)
+function [out] = preprocess(roi_name, varargin)
 
     addpath('./dependencies');
     addpath('./dependencies/EXTRACT-public');
@@ -63,10 +63,21 @@ function [out] = preprocess(roiName)
     addpath('./utilities/paths');
     addpath('./utilities/saving');
 
-    % roiName = '20260210/obj16X08W_ASAP6c_M1/roi2';
-    disp(['Processing /scratch/users/zqwang9/SLab/ASAP6c/' roiName]);
-    h5Path = fullfile('/scratch/users/zqwang9/SLab/ASAP6c', roiName, 'results/dataset.h5');
+    % roi_name = '20260210/obj16X08W_ASAP6c_M1/roi2';
+    disp(['Processing /scratch/users/zqwang9/SLab/ASAP6c/' roi_name]);
+    h5Path = fullfile('/scratch/users/zqwang9/SLab/ASAP6c', roi_name, 'results/dataset.h5');
 
+    options.run_moco=true;
+    options.run_dtr=true;
+    options.run_ext=true;
+    options.save_h5_range=true;
+    options.frame_range=[];
+
+    if nargin>1 % when function received more variable than roi_name
+        options=getOptions(options,varargin);
+    end
+
+    %%
     load(strrep(h5Path,'dataset.h5','metadata.mat'), 'bpFilter', 'metadata');
     fps = metadata.fps;
     
@@ -77,20 +88,47 @@ function [out] = preprocess(roiName)
     parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')));
     try
         %% Bandpass and motion correction
-        bandPassMovieChunk(h5Path, bpFilter);
-        path=char(strrep(h5Path,'.h5', '_bp.h5'));
-        motionCorr1Movie(path,'nonRigid', false,'isRawInput',false,'dcRemoval',false);
-    
-        %% Detrend
-        path=char(strrep(h5Path,'.h5', '_bp_moco.h5'));
-        detrending(path, 'samplingRate', fps,'spatialChunk', true);
-    
-        %% Extract (demix)
-        path=char(strrep(h5Path,'.h5','_bp_moco_dtr.h5'));
-        tic;runEXTRACT(path,'polarityGEVI','pos','cellRadius',15,'removeBackground',true,'method','robust');toc;  
+        if options.run_moco
+            bandPassMovieChunk(h5Path, bpFilter);
+            path=char(strrep(h5Path,'.h5', '_bp.h5'));
+            motionCorr1Movie(path,'nonRigid', false, 'isRawInput', false, 'dcRemoval', false);
+        end
 
+        %% Detrend
+        if options.run_dtr
+            path=char(strrep(h5Path,'.h5', '_bp_moco.h5'));
+            if isfile(path)
+                detrending(path, 'samplingRate', fps, 'spatialChunk', true);
+            else
+                disp(['Expecting ' path ' but file is not there.'])
+                out = 0;
+                return
+            end
+        end
+        %% Extract (demix)
+        if options.run_ext       
+            path=char(strrep(h5Path,'.h5','_bp_moco_dtr.h5'));
+            if isfile(path)
+                tic;
+                if isempty(options.frame_range)
+                    runEXTRACT(path,'polarityGEVI','pos','cellRadius',15,'removeBackground',true,'method','robust');
+                else
+                    if options.save_h5_range % save motion corrected movie for visual examination
+                        h5_target_name = char(strrep(h5Path,'.h5', '_bp_moco.h5'));
+                        h5_save_name = char(strrep(h5Path,'.h5', ['_bp_moco' num2str(options.frame_range(1)) '_' num2str(options.frame_range(2)) '.h5']));
+                        save_h5_range(h5_target_name, options.frame_range, h5_save_name)               
+                    end
+                    runEXTRACT(path,'polarityGEVI','pos','cellRadius',15,'removeBackground',true,'method','robust', 'frameRange', options.frame_range);
+                end
+                toc; 
+            else
+                disp(['Expecting ' path ' but file is not there.']);
+                out = 0;
+                return;
+            end
+        end
         % disp('Preprocess finished.');
-        disp(['Finish processing /scratch/users/zqwang9/SLab/ASAP6c/' roiName]);
+        disp(['Finish processing /scratch/users/zqwang9/SLab/ASAP6c/' roi_name]);
         out = 1;
 
     catch exception

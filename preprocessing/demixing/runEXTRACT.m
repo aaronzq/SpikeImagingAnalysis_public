@@ -110,7 +110,11 @@ switch options.polarityGEVI
         output=extractor(M,config);
         
         if ischar(h5Path)
-            fileName=['extractOutput_' options.polarityGEVI '_' datestr(datetime('now'),'yyyymmddTHHMMSS') '.mat'];
+            if isempty(options.frameRange)
+                fileName=['extractOutput_' options.polarityGEVI '_all' '_' datestr(datetime('now'),'yyyymmddTHHMMSS') '.mat'];
+            else
+                fileName=['extractOutput_' options.polarityGEVI '_' num2str(options.frameRange(1)) '_' num2str(options.frameRange(2)) '_' datestr(datetime('now'),'yyyymmddTHHMMSS') '.mat'];
+            end
             savePath=fullfile(outputdir,fileName);
             save(savePath,'output');
         end
