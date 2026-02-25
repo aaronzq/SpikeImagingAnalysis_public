@@ -93,7 +93,8 @@ if options.spatialChunk % if too many pixels > detrending is pixel-independent
     % chunks=0:round(mx/10):mx;
 
     nchunks = ceil(s.bytes/1024^3/13*10); %This is heuristic estimiation of chunk number, ZW 20260224
-    chunks=chunkFrames(nchunks,[1 mx]); %Use chunkFrames for chunk assignments, ZW 20260214
+    chunkSize = round(mx/nchunks);
+    chunks=chunkFrames(chunkSize,[1 mx]); %Use chunkFrames for chunk assignments, ZW 20260214
     for i=1:size(chunks,1)
         tic;
         [movie_dtr]=runPhotoBleachingRemoval(M(chunks(i,1):chunks(i,2),:,:),'samplingRate',fs,'lpCutOff',lpCutOff); %Use chunkFrames for chunk assignments, ZW 20260214
