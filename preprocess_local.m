@@ -1,7 +1,7 @@
 clear all;
 installSIA();
 
-roiName = '20260210/obj16X08W_ASAP6c_M1/roi2';
+roiName = '20260129/obj16X08W_ASAP6c_M1/roi1';
 h5Path = fullfile('C:\Users\Z\Documents\SLab', roiName, 'results/dataset.h5');
 
 load(strrep(h5Path,'dataset.h5','metadata.mat'), 'bpFilter', 'metadata', 'options');
@@ -25,7 +25,7 @@ try
 
     %% Extract (demix)
     path=char(strrep(h5Path,'.h5','_bp_moco_dtr.h5'));
-    tic;runEXTRACT(path,'polarityGEVI','pos','cellRadius',15,'removeBackground',true,'method','robust');toc;  
+    tic;output=runEXTRACT(path,'polarityGEVI','pos','cellRadius',15,'removeBackground',true,'method','robust');toc;  
 
     disp('Preprocess finished.');
     out = 1;
@@ -36,6 +36,10 @@ catch exception
 end
 
 %% Manual clean cell candidates
-datasetAVG = imread(fullfile(metadata.savePath, "avg.tif"));
+
+datasetAVG = imread(fullfile(metadata.savePath, "avg.tif")); % avg.tif has to be created manually from dataset_bp_moco.h5
+
+figure; show_cell_overlay(output, 1:size(output.spatial_weights,3), 'base', datasetAVG, 'contour_thresh', 0.3, 'label', 1);
+
 cleanExtractFiles(metadata.savePath, datasetAVG);
 

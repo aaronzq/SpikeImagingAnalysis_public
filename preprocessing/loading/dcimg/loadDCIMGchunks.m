@@ -62,6 +62,9 @@ options.dataset='mov';
 % Release memory
 options.releaseOnNframe = inf;
 
+% Preprocessing, i.e. conversion from ADU to photons
+options.preprocessingfunc = [];
+
 %% VARIABLE CHECK
 if nargin>=2
     options=getOptions(options,varargin); % CHECK IF NUMBER OF THE OPTION ARGUMENT OK!
@@ -124,7 +127,7 @@ if ~isempty(options.h5Path)
     
     for ichunk=1:size(chunksFirstLast,1) % this should be regular for loop as the inside DCIMG loading might be parallel already
         [movie_batch,~,~]=loadDCIMG(filePath,chunksFirstLast(ichunk,:),'resize',true,'scale_factor',options.scale_factor,...
-             'cropROI',options.cropROI,'parallel',options.parallel,'verbose',0,'imshow',options.imshow);
+             'cropROI',options.cropROI,'parallel',options.parallel,'verbose',0,'imshow',options.imshow, 'preprocessingfunc', options.preprocessingfunc);
         
         h5append(h5Path, single(movie_batch), options.dataset); % and that's enough an covers creation too. Don't convert to single yet. RC
 
@@ -144,7 +147,7 @@ else
     nframes_loaded=0;
     for ichunk=1:size(chunksFirstLast,1) % this should be regular for loop as the inside DCIMG loading might be parallel already
         [movie_batch,~,~]=loadDCIMG(filePath,chunksFirstLast(ichunk,:),'resize',true,'scale_factor',options.scale_factor,...
-            'cropROI',options.cropROI,'parallel',options.parallel,'verbose',0,'imshow',options.imshow);
+            'cropROI',options.cropROI,'parallel',options.parallel,'verbose',0,'imshow',options.imshow, 'preprocessingfunc', options.preprocessingfunc);
         
         movie(:,:,nframes_loaded+(1:size(movie_batch,3)))=single(movie_batch);
         nframes_loaded=nframes_loaded+size(movie_batch,3);

@@ -47,6 +47,9 @@ options.transpose=true; % we always transposed the original file to make
 %it compatible with Matlab displays but it is swapping camera rows with columns
 options.cropROI=[];
 
+% Preprocessing, i.e. conversion from ADU to photons, ZW 20260226
+options.preprocessingfunc=[];
+
 %% VARIABLE CHECK
 
 % setting up a first frame
@@ -189,6 +192,10 @@ if options.parallel % for parallel computing
         end
         
 %         imshow(framedata,[])
+        if ~isempty(options.preprocessingfunc)
+            framedata = options.preprocessingfunc(framedata);
+        end
+
 
         if ~isempty(options.cropROI)
             % detect if red channel > to flip it to be in the same ref as
@@ -222,7 +229,11 @@ else
         if options.transpose
             framedata=framedata';
         end
-        
+
+        if ~isempty(options.preprocessingfunc)
+            framedata = options.preprocessingfunc(framedata);
+        end
+
         % Done after imresize > ROI detected after resizing
         if ~isempty(options.cropROI)
             % detect if red channel > to flip it to be in the same ref as

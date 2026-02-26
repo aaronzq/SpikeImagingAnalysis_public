@@ -26,7 +26,7 @@ if isempty(dcimgFileList)
     error('no extract output file detected in any subfolder')
 end
 
-% Read a few frames in tiff for preview and roi determination in ImageJ
+% Read a few raw frames in tiff for preview and roi determination in ImageJ
 options.parallel = false;
 [movie,~,summary]=loadDCIMG(fullfile(metadata.mainFolder, dcimgFileList(1).name),[1,nPreview], options);
 imwrite(uint16(movie(:,:,1)), fullfile(metadata.savePath, 'InitialFrame.tif'));
@@ -47,6 +47,7 @@ options.binning = 2;
 options.parallel = true;
 options.imshow = true;
 options.releaseOnNframe = 100000;
+options.preprocessingfunc = @(temp) (temp-metadata.bias) .* metadata.fullwellcap ./ 2^(metadata.bitdepth) ./ metadata.quantumeff .* (options.binning)^2;
 [~,~,summary]=loadDCIMGchunks(fullfile(metadata.mainFolder, dcimgFileList(1).name), options);
 
 %%

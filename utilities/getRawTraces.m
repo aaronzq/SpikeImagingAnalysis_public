@@ -3,6 +3,14 @@ function [traces] = getRawTraces(movie_in, filters_in, varargin)
 % between raw image data and spatial filter
 
 % ZW 20260212
+    
+    if nargin>2
+        metadata = varargin{1};
+        binning = varargin{2};
+        photon_convert = true;
+    else
+        photon_convert = false;
+    end
 
     if ischar(movie_in)
         movie_dims = h5info(movie_in).Datasets.Dataspace.Size;
@@ -40,7 +48,9 @@ function [traces] = getRawTraces(movie_in, filters_in, varargin)
             
         movie_chunk = get_frames(frame_inds);
         movie_chunk = reshape(movie_chunk, num_pixels, num_frames_in_chunk);
-
+        if photon_convert
+            movie_chunk = (movie_chunk-metadata.bias) .* metadata.fullwellcap ./ 2^(metadata.bitdepth) ./ metadata.quantumeff * binning^2; % subtract the CMOS bias and convert to photons 
+        end
         traces(:,frame_inds) = filters' * single(movie_chunk);
     end
 

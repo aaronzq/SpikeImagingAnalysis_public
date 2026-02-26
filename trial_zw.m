@@ -1,7 +1,7 @@
 %% Setup file path
 clear all
 
-metadata.mainFolder = 'C:\Users\Z\Documents\SLab\20260129\obj16X08W_ASAP6c_M1\roi3';
+metadata.mainFolder = 'C:\Users\Z\Documents\SLab\20260129\obj16X08W_ASAP6c_M1\roi5';
 metadata.mocoFolder = 'demotion';
 metadata.saveFolder = 'output';
 
@@ -11,8 +11,8 @@ metadata.bias = 100;
 metadata.fullwellcap = 15000;
 metadata.bitdepth = 16;
 metadata.quantumeff = 0.8;
-metadata.roi = [455 0 840 195]; % in the original coordinate system [x0, y0, w, h], x0, y0 starts at 0
-metadata.scaling = 1; % image scaling after roi cropping
+metadata.roi = [597, 0, 310, 195]; % in the original coordinate system [x0, y0, w, h], x0, y0 starts at 0
+metadata.scaling = 0.5; % image scaling after roi cropping
 
 metadata.savePath = fullfile(metadata.mainFolder, metadata.saveFolder);
 if ~exist(metadata.savePath, 'dir')

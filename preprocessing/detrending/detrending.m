@@ -93,7 +93,7 @@ if options.spatialChunk % if too many pixels > detrending is pixel-independent
     % chunks=0:round(mx/10):mx;
 
     nchunks = ceil(s.bytes/1024^3/13*10); %This is heuristic estimiation of chunk number, ZW 20260224
-    chunkSize = round(mx/nchunks);
+    chunkSize = max(round(mx/nchunks),1);
     chunks=chunkFrames(chunkSize,[1 mx]); %Use chunkFrames for chunk assignments, ZW 20260214
     for i=1:size(chunks,1)
         tic;
