@@ -1,6 +1,6 @@
 clear all;
 
-metadata.mainFolder='C:\Users\Z\Documents\SLab\20260129\obj16X08W_ASAP6c_M1\roi1';
+metadata.mainFolder='C:\Users\Z\Documents\SLab\20260129\obj16X08W_ASAP6c_M1\roi8';
 metadata.outputFolder = 'results';
 metadata.fps = 1000; % hz
 metadata.exposure = 0.996;  % ms
@@ -10,7 +10,7 @@ metadata.bitdepth = 16;
 metadata.quantumeff = 0.8;
 
 % Create folders
-metadata.h5Path = fullfile(metadata.mainFolder, metadata.outputFolder, "dataset_test3.h5");
+metadata.h5Path = fullfile(metadata.mainFolder, metadata.outputFolder, "dataset.h5");
 metadata.savePath = fullfile(metadata.mainFolder, metadata.outputFolder);
 if ~exist(metadata.savePath, 'dir')
     mkdir(metadata.savePath);
@@ -28,9 +28,9 @@ imgNames = {imgFiles(order).name};
 
 %% Load & Convert tiff data
 
-options.cropROI = [608, 0, 560, 200];
+options.cropROI = [585, 0, 300, 200];
 options.h5Path = metadata.h5Path;
-options.frameRange = [1,1];
+options.frameRange = [1,10000];
 options.binning = 2;
 options.scale_factor = 1/options.binning;
 % read tiff files into workspace and save in mat

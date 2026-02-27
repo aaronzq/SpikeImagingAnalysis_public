@@ -111,14 +111,14 @@ function [out] = preprocess(roi_name, varargin)
             if isfile(path)
                 tic;
                 if isempty(options.frame_range)
-                    runEXTRACT(path,'polarityGEVI','pos','cellRadius',15,'removeBackground',true,'method','robust');
+                    runEXTRACT(path,'polarityGEVI','pos','cellRadius',10,'removeBackground',true,'method','robust');
                 else
                     if options.save_h5_range % save motion corrected movie for visual examination
                         h5_target_name = char(strrep(h5Path,'.h5', '_bp_moco.h5'));
                         h5_save_name = char(strrep(h5Path,'.h5', ['_bp_moco' num2str(options.frame_range(1)) '_' num2str(options.frame_range(2)) '.h5']));
                         save_h5_range(h5_target_name, options.frame_range, h5_save_name)               
                     end
-                    runEXTRACT(path,'polarityGEVI','pos','cellRadius',15,'removeBackground',true,'method','robust', 'frameRange', options.frame_range);
+                    runEXTRACT(path,'polarityGEVI','pos','cellRadius',10,'removeBackground',true,'method','robust', 'frameRange', options.frame_range);
                 end
                 toc; 
             else

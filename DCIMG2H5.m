@@ -37,7 +37,7 @@ end
 clear movie options
 %% Load & Convert .dcimg data
 
-options.cropROI = [702, 0, 350, 200];
+options.cropROI = [710, 0, 350, 200];
 % options.resize = true;
 % options.scale_factor = 0.5;
 % [movie,~,summary]=loadDCIMG(fullfile(mainFolder, dcimgFileList(1).name),[1,100], options);
@@ -46,7 +46,7 @@ options.frameRange = [1,200000];
 options.binning = 2;
 options.parallel = true;
 options.imshow = true;
-options.releaseOnNframe = 100000;
+options.releaseOnNframe = 10000;
 options.preprocessingfunc = @(temp) (temp-metadata.bias) .* metadata.fullwellcap ./ 2^(metadata.bitdepth) ./ metadata.quantumeff .* (options.binning)^2;
 [~,~,summary]=loadDCIMGchunks(fullfile(metadata.mainFolder, dcimgFileList(1).name), options);
 

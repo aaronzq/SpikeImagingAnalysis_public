@@ -1,7 +1,7 @@
 clear all;
 % installSIA();
 
-roiName = '20260129\obj16X08W_ASAP6c_M1\roi1';
+roiName = '20260129\obj16X08W_ASAP6c_M1\roi7';
 h5Path = fullfile('C:\Users\Z\Documents\SLab', roiName, 'results/dataset.h5');
 
 load(strrep(h5Path,'dataset.h5','metadata.mat'), 'bpFilter', 'metadata', 'options');
@@ -24,25 +24,21 @@ figure; plot(traces_photon);
 %% Calculate f0, dff, and detect spikes
 
 
-id = 1;
+id = 2;
 
 
 t = 1/(fps)*(1:size(traces_photon,1));
 f0 = movmedian(traces_photon(:,id),1000);
+dff = traces_photon(:,id)./f0-1;
 
 
-
-
-
-
-% dff = traces(:,id)./f0-1;
-dff = output.temporal_weights(:,output.cellID(id));
+% dff = output.temporal_weights(:,output.cellID(id));
 figure; 
 plot(traces_photon(:,id)); hold on; plot(f0,'r'); title(['Cell ID: ' num2str(output.cellID(id))])
 
 
-hi = 3*std(dff);
-lo = 0.01;
+hi = 0.025;
+lo = 0.02;
 
 dff_f = schmitt(dff, hi, lo);
 spikes1 = diff([0;dff_f])>0.5;
@@ -82,11 +78,11 @@ set(gcf, 'Color', 'w');
 
 
 % Box plot for correlation distribution
-figure; boxplot(dff_stat, 'Colors', 'k', 'Orientation', 'vertical', 'Symbol',' ')
+figure; boxplot(dp_stat, 'Colors', 'k', 'Orientation', 'vertical', 'Symbol',' ')
 hold on;
 
-hs = scatter(ones(length(dff_stat),1), dff_stat, ones(length(dff_stat),1)*8,...
-    repmat([255, 40, 5]/255,[length(dff_stat),1]),...
+hs = scatter(ones(length(dp_stat),1), dp_stat, ones(length(dp_stat),1)*8,...
+    repmat([255, 40, 5]/255,[length(dp_stat),1]),...
     'filled', 'MarkerFaceAlpha', 1, 'jitter','on','JitterAmount',0.1);
 
 h = findobj(gca,'Tag','Box');
@@ -100,52 +96,52 @@ set(gcf, 'Position', [258.3333333333333,456.3333333333333,414.6666666666667,377.
 title(['Cell ID: ' num2str(output.cellID(id))])
 hold off
 %%
-
-waveforms = {};
-wid = 1;
-wave_halfwidth = 5;
-for ss = 1:length(spikes_ind)
-    
-    if (spikes_ind(ss)-wave_halfwidth > 0) && (spikes_ind(ss)+wave_halfwidth <= size(traces,1))
-        
-        temp = dff(spikes_ind(ss)-wave_halfwidth:spikes_ind(ss)+wave_halfwidth);
-        waveforms{wid} = temp;
-        plot(temp); hold on
-        wid=wid+1;
-    end
-end
-
-
-
-waveforms = cell2mat(waveforms);
-waveforms = waveforms';
-figure; plot(mean(waveforms,1))
-
-
-options.handle     = figure;
-options.color_area = [0 0 0]./255;    % Black theme
-options.color_line = [ 0 0 0]./255;
-% options.color_area = [128 193 219]./255;    % Blue theme
-% options.color_line = [ 52 148 186]./255;
-% options.color_area = [240 191 74]./255;    % Orange theme
-% options.color_line = [240 191 74]./255;
-options.alpha      = 0.3;
-options.line_width = 2;
-options.error      = 'std';
-options.x_axis = 1000/1000*(1:size(waveforms,2));
-plot_areaerrorbar(waveforms,options)
-set(gcf, 'Color', 'w');
-set(gcf, "Position", [289,480,506,363]);
-ax = gca;
-% ax.TickDir = 'none';
-axis tight
-ax.LineWidth = 1;
-xlim([1 1000/1000*size(waveforms,2)])
-% ylim([-0.05 0.20])
-
-hold on;
-mean_wave = mean(waveforms,1);
-plot(options.x_axis(round(0.5*wave_halfwidth)+1:round(1.5*wave_halfwidth)+1), mean_wave(round(0.5*wave_halfwidth)+1:round(1.5*wave_halfwidth)+1), 'k.', 'MarkerSize', 20, 'MarkerEdgeColor',[0 0 0]./255)
-
-
-
+% 
+% waveforms = {};
+% wid = 1;
+% wave_halfwidth = 5;
+% for ss = 1:length(spikes_ind)
+% 
+%     if (spikes_ind(ss)-wave_halfwidth > 0) && (spikes_ind(ss)+wave_halfwidth <= size(traces,1))
+% 
+%         temp = dff(spikes_ind(ss)-wave_halfwidth:spikes_ind(ss)+wave_halfwidth);
+%         waveforms{wid} = temp;
+%         plot(temp); hold on
+%         wid=wid+1;
+%     end
+% end
+% 
+% 
+% 
+% waveforms = cell2mat(waveforms);
+% waveforms = waveforms';
+% figure; plot(mean(waveforms,1))
+% 
+% 
+% options.handle     = figure;
+% options.color_area = [0 0 0]./255;    % Black theme
+% options.color_line = [ 0 0 0]./255;
+% % options.color_area = [128 193 219]./255;    % Blue theme
+% % options.color_line = [ 52 148 186]./255;
+% % options.color_area = [240 191 74]./255;    % Orange theme
+% % options.color_line = [240 191 74]./255;
+% options.alpha      = 0.3;
+% options.line_width = 2;
+% options.error      = 'std';
+% options.x_axis = 1000/1000*(1:size(waveforms,2));
+% plot_areaerrorbar(waveforms,options)
+% set(gcf, 'Color', 'w');
+% set(gcf, "Position", [289,480,506,363]);
+% ax = gca;
+% % ax.TickDir = 'none';
+% axis tight
+% ax.LineWidth = 1;
+% xlim([1 1000/1000*size(waveforms,2)])
+% % ylim([-0.05 0.20])
+% 
+% hold on;
+% mean_wave = mean(waveforms,1);
+% plot(options.x_axis(round(0.5*wave_halfwidth)+1:round(1.5*wave_halfwidth)+1), mean_wave(round(0.5*wave_halfwidth)+1:round(1.5*wave_halfwidth)+1), 'k.', 'MarkerSize', 20, 'MarkerEdgeColor',[0 0 0]./255)
+% 
+% 
+% 
