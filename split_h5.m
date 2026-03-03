@@ -1,7 +1,7 @@
 %% Separate h5 dataset in n parts for imagej visualization
 
-mainPath = 'C:\Users\Z\Documents\SLab\20260210\obj16X08W_ASAP6c_M1\roi2\results';
-h5Name = 'dataset_bp_moco.h5';
+mainPath = 'C:\Users\Z\Documents\SLab\20260219\obj16X08W_ASAP6c_M1\roi3\results';
+h5Name = 'dataset_bp_moco200001_400000.h5';
 savePath = fullfile(mainPath, 'visualization');
 
 if ~exist(savePath, "dir")

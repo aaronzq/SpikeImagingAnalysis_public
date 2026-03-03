@@ -1,30 +1,42 @@
 clear all;
-% installSIA();
+installSIA();
 
-roiName = '20260129\obj16X08W_ASAP6c_M1\roi7';
+roiName = '20260129\obj16X08W_ASAP6c_M1\roi10';
 h5Path = fullfile('C:\Users\Z\Documents\SLab', roiName, 'results/dataset.h5');
 
 load(strrep(h5Path,'dataset.h5','metadata.mat'), 'bpFilter', 'metadata', 'options');
 fps = metadata.fps;
 binning = options.binning;
-
+% savePath = metadata.savePath;
+savePath = fullfile('C:\Users\Z\Documents\SLab', roiName, 'results');
+time_range = [];
+% time_range = [1,200000];
+% time_range = [200001,400000];
+% time_range = [400001,600000];
+% time_range = [600001,800000];
+% time_range = [800001,1000000];
+% time_range = [1000001,1200000];
 %% Only use the spatial filters from EXTRACT and get the raw signals. 
-d = dir(fullfile(metadata.savePath, 'DemixingEXTRACT', 'dataset_bp_moco_dtr', '*_clean*.mat'));
+d = dir(fullfile(savePath, 'DemixingEXTRACT', 'dataset_bp_moco_dtr', '*_clean*.mat'));
 if isempty(d)
-    error('No _clean .mat file found in %s', fullfile(metadata.savePath, 'DemixingEXTRACT', 'dataset_dtr'));
+    error('No _clean .mat file found in %s', fullfile(savePath, 'DemixingEXTRACT', 'dataset_dtr'));
 end
 cleanMatFile = fullfile(d(1).folder, d(1).name);
 load(cleanMatFile);
-datasetAVG = imread(fullfile(metadata.savePath, "avg.tif"));
+datasetAVG = imread(fullfile(savePath, "avg.tif"));
 figure; show_cell_overlay(output, output.cellID, 'base', datasetAVG, 'contour_thresh', 0.3, 'label', 1);
 figure; plot(output.temporal_weights(:,output.cellID));
-path=char(strrep(h5Path,'.h5', '_bp_moco.h5'));
+if isempty(time_range)
+    path=char(strrep(h5Path,'.h5', '_bp_moco.h5'));
+else
+    path=char(strrep(h5Path,'.h5', ['_bp_moco' num2str(time_range(1)) '_' num2str(time_range(2)) '.h5']));
+end
 [traces_photon] = getRawTraces(path, output.spatial_weights(:,:,output.cellID));
 figure; plot(traces_photon);
 %% Calculate f0, dff, and detect spikes
 
 
-id = 2;
+id = 3;
 
 
 t = 1/(fps)*(1:size(traces_photon,1));
@@ -34,11 +46,12 @@ dff = traces_photon(:,id)./f0-1;
 
 % dff = output.temporal_weights(:,output.cellID(id));
 figure; 
-plot(traces_photon(:,id)); hold on; plot(f0,'r'); title(['Cell ID: ' num2str(output.cellID(id))])
+plot(t,traces_photon(:,id),'k'); hold on; plot(t,f0,'r','LineWidth',2); title(['Cell ID: ' num2str(output.cellID(id))]);
+ylabel('Photons'); xlabel('Time(s)')
 
 
-hi = 0.025;
-lo = 0.02;
+hi = 0.06;
+lo = 0.035;
 
 dff_f = schmitt(dff, hi, lo);
 spikes1 = diff([0;dff_f])>0.5;
@@ -71,6 +84,7 @@ figure;
 plot(t, dff, 'Color',[0.0,0.0,0.0]); hold on;
 plot(t(spikes_ind),dff(spikes_ind),'r.', 'MarkerSize',10); hold off;
 title(['Cell ID: ' num2str(output.cellID(id))])
+% title(['Cell ID: ' num2str(id)])
 set(gcf, 'Color', 'w');
 % figure;
 % histogram(dff_stat);
@@ -92,7 +106,7 @@ for ci=1:length(hh.Children)
     set(hh.Children(ci), 'LineWidth', 1.5);
 end
 set(gcf, 'Color', 'w');
-set(gcf, 'Position', [258.3333333333333,456.3333333333333,414.6666666666667,377.3333333333333])
+% set(gcf, 'Position', [258.3333333333333,456.3333333333333,414.6666666666667,377.3333333333333])
 title(['Cell ID: ' num2str(output.cellID(id))])
 hold off
 %%

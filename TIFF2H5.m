@@ -1,6 +1,6 @@
 clear all;
 
-metadata.mainFolder='C:\Users\Z\Documents\SLab\20260129\obj16X08W_ASAP6c_M1\roi8';
+metadata.mainFolder='C:\Users\Z\Documents\SLab\20260219\obj16X08W_ASAP6c_M1\roi1';
 metadata.outputFolder = 'results';
 metadata.fps = 1000; % hz
 metadata.exposure = 0.996;  % ms
@@ -28,7 +28,7 @@ imgNames = {imgFiles(order).name};
 
 %% Load & Convert tiff data
 
-options.cropROI = [585, 0, 300, 200];
+options.cropROI = [736, 0, 290, 200];
 options.h5Path = metadata.h5Path;
 options.frameRange = [1,10000];
 options.binning = 2;
